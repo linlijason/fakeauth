@@ -1,0 +1,25 @@
+/**
+ * Created by liumengjun on 2017-08-23.
+ */
+select {
+  margin-right: 15px;
+  height: 32px; }
+
+.row {
+  padding-top: 7px; }
+
+.flags {
+  line-height: 30px; }
+  .flags .flag {
+    display: inline-block;
+    width: 50px;
+    height: 30px; }
+
+.flag-month {
+  background-color: #788db1; }
+
+.flag-week {
+  background-color: #8578ad; }
+
+.flag-today {
+  background-color: #f5de8a; }

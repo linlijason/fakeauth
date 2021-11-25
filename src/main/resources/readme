@@ -1,0 +1,13 @@
+
+
+
+http://localhost:23333/login/callback?token=1234&username=admin&login_url=no
+
+
+jar -xvf xxxx.jar
+
+jar  -cvfM0 xxxx.jar .    
+
+
+java -Dspring.redis.host=47.108.189.93 -Dspring.redis.port=8016 -Dspring.redis.password=bistro9999  -Djumei.auth.api.addr=http://localhost:8080/auth -Dspring.datasource.url="jdbc:mysql://47.108.189.93:8014/test?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&connectTimeout=2000" -Dspring.datasource.username=root -Dspring.datasource.password=bistro8888 -jar main.jar
+

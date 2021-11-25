@@ -1,0 +1,27 @@
+spring:
+  freemarker:
+    content-type: text/html
+    expose-request-attributes: true
+    expose-session-attributes: true
+    suffix: .ftl
+    template-loader-path: classpath:/templates/
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: bistro8888
+    url: jdbc:mysql://47.108.189.93:8014/test?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&connectTimeout=2000
+    hikari:
+      connection-test-query: select 1
+      maximum-pool-size: 10
+      minimum-idle: 1
+      idle-timeout: 180000
+  redis:
+    password: bistro9999
+    host: 47.108.189.93
+    port: 8016
+    jedis:
+      pool:
+        max-active: 100
+        min-idle: 4
+    client-type: jedis

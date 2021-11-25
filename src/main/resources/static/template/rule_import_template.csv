@@ -1,0 +1,2 @@
+"name","category","field_id","operator_id","threshold_value","hit_score","not_hit_score","unknown_score","description"
+这是规则名称,风险规则|放行规则|拒绝规则,字段ID整数,操作符ID整数,"这里是阈值",100,0,未知时分值整数,规则描述

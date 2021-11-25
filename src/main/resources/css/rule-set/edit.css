@@ -1,0 +1,38 @@
+#rule-priority-list {
+  padding-left: 17px; }
+
+.priority-rule {
+  padding-left: 5px;
+  padding-top: 8px;
+  line-height: 34px; }
+  .priority-rule > div {
+    display: inline-block;
+    width: 100%;
+    vertical-align: middle; }
+
+.sub-rule-list {
+  border-left: dashed 1px #ddd;
+  padding-left: 28px;
+  margin-top: 8px; }
+  .sub-rule-list .rule {
+    margin-left: -12px;
+    margin-bottom: 8px; }
+    .sub-rule-list .rule > div {
+      display: inline-block;
+      margin: 0;
+      width: 100%; }
+    .sub-rule-list .rule span.form-control-static {
+      float: left;
+      width: 38px;
+      text-align: justify;
+      text-align-last: justify;
+      font-size: 12px; }
+
+.link {
+  fill: none;
+  stroke: #99ccff;
+  stroke-width: 2px; }
+
+#tree {
+  overflow-x: auto;
+  overflow-y: auto; }
