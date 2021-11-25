@@ -15,7 +15,7 @@
   <section class="content container-fluid">
 
     <div class="login-box-body">
-      <form action="/login/auth" method="post" class="form-horizontal" role="form"
+      <form action="/auth/signin" method="post" class="form-horizontal" role="form"
             onSubmit="return checkSubmit()">
         <div class="form-group has-feedback">
           <label class="col-sm-3 control-label"></label>

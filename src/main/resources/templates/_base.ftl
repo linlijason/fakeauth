@@ -95,7 +95,7 @@ ${custom_css}
               </ul>
               <!-- /.dropdown-menu -->
             <#else >
-              <a href="/login"" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="font-size:1.2em;">
+              <a href="/login" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="font-size:1.2em;">
                 <i class="fa fa-user" aria-hidden="true"></i>
                 <span class="hidden-xs">登录</span>
               </a>
@@ -211,7 +211,7 @@ ${custom_css}
   <!-- Main Footer -->
   <footer class="main-footer">
     <!-- Default to the left -->
-    <strong>Copyright &copy; 2017 <a href="//advance.ai">ADVANCE.AI</a>.</strong> All rights reserved.
+    <strong>Copyright &copy; 2017 JASON.</strong> All rights reserved.
   </footer>
 
 </div>

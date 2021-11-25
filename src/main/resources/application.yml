@@ -23,5 +23,10 @@ spring:
     jedis:
       pool:
         max-active: 100
-        min-idle: 4
+        min-idle: 1
     client-type: jedis
+
+
+auth:
+  appkey: e9d34b22cdcd11e78d73842b2b738d12
+  loginurl: http://localhost:23333/login/callback
