@@ -3,6 +3,8 @@ package com.jason.fakeauth.controller;
 
 import com.jason.fakeauth.data.User;
 import com.jason.fakeauth.data.UserJpaRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -43,9 +45,11 @@ public class AuthController {
     @Value("${auth.loginurl}")
     private String loginurl;
 
+    private static final Logger logger  = LoggerFactory.getLogger(AuthController.class);
+
     @GetMapping("/auth/login")
     public String fakeLogin(){
-
+        ///login/?camefrom=
         return  "login";
     }
 
@@ -84,8 +88,10 @@ public class AuthController {
         String s = token + appKey + user.getUsername();
         String sessionId = encode(s, "SHA1");
         Map<String, String> value = new HashMap<>();
+        value.put("username",user.getUsername());
         redis.opsForHash().putAll(sessionId, value);
         redis.expire(sessionId, 8, TimeUnit.HOURS);
+        logger.info("successOk user={} sessionId={}",user.getUsername(),sessionId);
         return "redirect:" + loginurl + String.format("?token=%s&username=%s&login_url=no", token, user.getUsername());
     }
 

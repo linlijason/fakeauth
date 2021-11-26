@@ -14,7 +14,7 @@
 //    public boolean preHandle(HttpServletRequest request,
 //                             HttpServletResponse response, Object handler) throws Exception {
 //
-//        logger.info("永远过");
+//        logger.info("request:{}",request.getRequestURI());
 //        return true;
 //
 //    }

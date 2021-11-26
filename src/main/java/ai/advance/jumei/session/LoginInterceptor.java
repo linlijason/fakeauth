@@ -1,8 +1,11 @@
 //package ai.advance.jumei.session;
 //
+//import ai.advance.jumei.util.AuthUtils;
+//import ai.advance.jumei.util.Constant;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 //import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.data.redis.core.StringRedisTemplate;
 //import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 //
 //import javax.servlet.http.HttpServletRequest;
@@ -14,19 +17,40 @@
 //    @Autowired
 //    private UserHolder userHolder;
 //
-//    private static Logger logger= LoggerFactory.getLogger(LoginInterceptor.class);
+//    @Autowired
+//    private StringRedisTemplate redisTemplate;
+//
+//    private static Logger logger = LoggerFactory.getLogger(LoginInterceptor.class);
 //
 //    @Override
 //    public boolean preHandle(HttpServletRequest request,
 //                             HttpServletResponse response, Object handler) throws Exception {
-//       // AuthUtils.getSessionId()
-//        UserCache userCache=new UserCache();
-//        userCache.setUsername("admin");
+//
+//
+//        String sid = getSessionId(request);
+//        if (sid == null) {
+//            return false;
+//        }
+//        String username = (String) redisTemplate.opsForHash().get(sid, "username");
+//        if (username == null) {
+//            return false;
+//        }
+//        UserCache userCache = new UserCache();
+//        userCache.setUsername(username);
 //        userCache.setAuthorities(new ArrayList<>());
 //        userCache.setAuthPath(new ArrayList<>());
 //        userHolder.setUser(userCache);
-//        logger.info("PHP是垃圾!!!");
+//       // logger.info("PHP是垃圾!!!");
 //        return true;
+//
+//    }
+//
+//    private String getSessionId(HttpServletRequest request) {
+//        try {
+//            return (String) request.getSession().getAttribute(Constant.getJUMEI_SESSION_KEY());
+//        } catch (Exception e) {
+//            return null;
+//        }
 //
 //    }
 //}
