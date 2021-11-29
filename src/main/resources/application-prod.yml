@@ -1,0 +1,33 @@
+spring:
+  freemarker:
+    content-type: text/html
+    expose-request-attributes: true
+    expose-session-attributes: true
+    suffix: .ftl
+    template-loader-path: classpath:/templates/
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: developer
+    password: '*&uhnFk12HJK'
+    url: jdbc:mysql://localhost:9020/rule_engine?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&connectTimeout=2000
+    hikari:
+      connection-test-query: select 1
+      maximum-pool-size: 10
+      minimum-idle: 1
+      idle-timeout: 180000
+  redis:
+    password: youshallnotpass9
+    host: localhost
+    port: 8021
+    jedis:
+      pool:
+        max-active: 100
+        min-idle: 1
+    client-type: jedis
+    database: 0
+
+
+auth:
+  appkey: e9d34b22cdcd11e78d73842b2b738d12
+  loginurl: http://8.214.92.119:23333/login/callback
