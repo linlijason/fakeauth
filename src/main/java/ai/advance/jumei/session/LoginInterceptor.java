@@ -11,6 +11,7 @@
 //import javax.servlet.http.HttpServletRequest;
 //import javax.servlet.http.HttpServletResponse;
 //import java.util.ArrayList;
+//import java.util.List;
 //
 //public class LoginInterceptor extends HandlerInterceptorAdapter {
 //
@@ -35,12 +36,20 @@
 //        if (username == null) {
 //            return false;
 //        }
+//        String roles = (String) redisTemplate.opsForHash().get(sid, "roles");
+//        if (roles == null) {
+//            roles = "";
+//        }
+//        List<String> authorities = new ArrayList<>();
+//        for (String s : roles.split(",")) {
+//            authorities.add(s);
+//        }
 //        UserCache userCache = new UserCache();
 //        userCache.setUsername(username);
-//        userCache.setAuthorities(new ArrayList<>());
+//        userCache.setAuthorities(authorities);
 //        userCache.setAuthPath(new ArrayList<>());
 //        userHolder.setUser(userCache);
-//       // logger.info("PHP是垃圾!!!");
+//        // logger.info("PHP是垃圾!!!");
 //        return true;
 //
 //    }

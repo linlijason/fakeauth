@@ -89,6 +89,8 @@ public class AuthController {
         String sessionId = encode(s, "SHA1");
         Map<String, String> value = new HashMap<>();
         value.put("username",user.getUsername());
+        value.put("roles",user.getRole());
+
         redis.opsForHash().putAll(sessionId, value);
         redis.expire(sessionId, 8, TimeUnit.HOURS);
         logger.info("successOk user={} sessionId={}",user.getUsername(),sessionId);
