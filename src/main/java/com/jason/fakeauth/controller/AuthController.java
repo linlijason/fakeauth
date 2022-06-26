@@ -57,6 +57,14 @@ public class AuthController {
     public String signin(@RequestParam("username")String username,
                          @RequestParam("password")String password,
                          ModelMap modelMap){
+
+        /*
+
+            private static final String SUPERUSER = "SUPERUSER";
+    private static final String MANAGER = "MANAGER";
+    private static final String SPECIALIST = "SPECIALIST";
+
+         */
         Optional<User> user = userJpaRepository.findByUsername(username);
         if(user.isPresent()){
             if(user.get().getStatus()==0){
