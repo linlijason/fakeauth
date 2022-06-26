@@ -20,6 +20,12 @@
 //
 //    @Autowired
 //    private StringRedisTemplate redisTemplate;
+
+//import org.springframework.beans.factory.annotation.Value;
+//
+//@Value("${jumei.auth.api.addr}")
+//private String LOGIN_API_ADDR;
+
 //
 //    private static Logger logger = LoggerFactory.getLogger(LoginInterceptor.class);
 //
@@ -34,6 +40,7 @@
 //        }
 //        String username = (String) redisTemplate.opsForHash().get(sid, "username");
 //        if (username == null) {
+    // LOGIN_API_ADDR+"/login"
 //            return false;
 //        }
 //        String roles = (String) redisTemplate.opsForHash().get(sid, "roles");
