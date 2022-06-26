@@ -13,19 +13,21 @@
 //import java.util.ArrayList;
 //import java.util.List;
 //
+//import org.springframework.beans.factory.annotation.Value;
+//
 //public class LoginInterceptor extends HandlerInterceptorAdapter {
 //
+//    private static Logger log = LoggerFactory.getLogger(LoginInterceptor.class);
 //    @Autowired
 //    private UserHolder userHolder;
 //
 //    @Autowired
 //    private StringRedisTemplate redisTemplate;
-
-//import org.springframework.beans.factory.annotation.Value;
 //
-//@Value("${jumei.auth.api.addr}")
-//private String LOGIN_API_ADDR;
-
+//
+//    @Value("${jumei.auth.api.addr}")
+//    private String LOGIN_API_ADDR;
+//
 //
 //    private static Logger logger = LoggerFactory.getLogger(LoginInterceptor.class);
 //
@@ -36,11 +38,14 @@
 //
 //        String sid = getSessionId(request);
 //        if (sid == null) {
+//            log.info("no session.");
+//            response.sendRedirect(LOGIN_API_ADDR + "/login");
 //            return false;
 //        }
 //        String username = (String) redisTemplate.opsForHash().get(sid, "username");
 //        if (username == null) {
-    // LOGIN_API_ADDR+"/login"
+//            log.info("no username.", sid);
+//            response.sendRedirect(LOGIN_API_ADDR + "/login");
 //            return false;
 //        }
 //        String roles = (String) redisTemplate.opsForHash().get(sid, "roles");
