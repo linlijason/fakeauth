@@ -137,7 +137,7 @@ $(function(){
       $transitionListBox.append($transRow);
     });
     //计算最大分数
-    updateMaxScore();
+    // updateMaxScore();
   })();
   if (show_mode) {
     $('input, select').prop('readonly', true).prop('disabled', true).css('background-color', '#fff');
