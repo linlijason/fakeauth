@@ -137,7 +137,7 @@ $(function(){
       $transitionListBox.append($transRow);
     });
     //计算最大分数
-    // updateMaxScore();
+     updateMaxScore(false);
   })();
   if (show_mode) {
     $('input, select').prop('readonly', true).prop('disabled', true).css('background-color', '#fff');
@@ -393,7 +393,7 @@ $(function(){
       var confirm = window.confirm("取消添加会清空下级所有规则，确定？");
       if (!confirm) return;
       $subRuleList.empty();
-      updateMaxScore();
+      updateMaxScore(true);
       updateRuleTree();
     }
   };
@@ -424,7 +424,7 @@ $(function(){
       var $subRuleList = $rule.find('.sub-rule-list').first();
       $subRuleList.find('select,button').prop('disabled', true);
     }
-    updateMaxScore();
+    updateMaxScore(true);
     updateRuleTree();
   };
   $('select.rule-select').change(ruleSelectChangeHandle);
@@ -440,7 +440,7 @@ $(function(){
     updateSvgTree(ruleTreeRoot);
   }
 
-  function updateMaxScore(){
+  function updateMaxScore(setValue){
     var rrList = collectRuleList();
     if ($type.val() == TYPE_TREE) {
       var ruleTreeRoot = convRuleRelationsToTree(rrList);
@@ -471,14 +471,17 @@ $(function(){
       });
     }
     console.log(maxScore);
-    $('#refuseScoreMax').val(maxScore || '');
+    if(setValue){
+      $('#refuseScoreMax').val(maxScore || '');
+    }
+
   }
 
   //规则执行流程操作 - priority-list
   var actionRemoveOnePriorityRule = function(e){
     e.preventDefault();
     $(this).closest('.priority-rule').remove();
-    updateMaxScore();
+    updateMaxScore(true);
   };
   var actionMoveUpOnePriorityRule = function(e) {
     e.preventDefault();
