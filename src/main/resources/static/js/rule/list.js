@@ -67,6 +67,11 @@ $(function(){
         'aoColumnDefs': [{'bSortable': false, "aTargets": [1,2,3,7,9]},{'targets':[9],'sWidth':'20%'}],
         'info': true,
         'autoWidth': false,
+        'scrollX':true,
+        'fixedColumns':{
+          'leftColumns': 2,
+          'rightColumns': 1
+        },
         'language': {
           'emptyTable':'未查询到数据',
           'zeroRecords':'未找到符合条件的数据',

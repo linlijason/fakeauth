@@ -87,11 +87,11 @@ ${custom_css}
               </a>
               <ul class="dropdown-menu">
                 <!-- Menu Body -->
-                <#if current_user.authorities?seq_contains("SUPERUSER")>
-                  <li><a href="${auth_users_addr}" target="_blank">账户管理</a></li>
-                </#if>
-                <li><a href="${auth_home_addr}">修改密码</a></li>
-                <li><a href="/logout">退出</a></li>
+<#--                <#if current_user.authorities?seq_contains("SUPERUSER")>-->
+<#--                  <li><a href="${auth_users_addr}" target="_blank">账户管理</a></li>-->
+<#--                </#if>-->
+                <li><a href="#"  data-toggle="modal" data-target="#modal-change-password">修改密码</a></li>
+<#--                <li><a href="/logout">退出</a></li>-->
               </ul>
               <!-- /.dropdown-menu -->
             <#else >
