@@ -64,7 +64,7 @@
       <form id="hiddenExportA" class="hide hidden" action="/rule/list/export/by/ids" method="post" target="_blank">
         <input type="hidden" id="ids" name="ids">
       </form>
-      <a href="javascript:export_excel()" class="btn btn-info" target="_blank">导出Excel</a>
+<#--      <a href="javascript:export_excel()" class="btn btn-info" target="_blank">导出Excel</a>-->
     </div>
   </section>
 

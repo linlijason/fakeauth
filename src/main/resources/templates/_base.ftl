@@ -161,7 +161,7 @@ ${custom_css}
       <#--<li class="header">HEADER</li>-->
         <!-- Optionally, you can add icons to the links -->
         <li class="active tree-view menu-open">
-          <a href="#"><i class="fa fa-hand-paper-o"></i> <span>规则引擎</span>
+          <a href="#"><i class="fa fa-hand-paper-o"></i> <span>规则决策引擎</span>
             <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
           </a>
           <ul class="treeview-menu">
@@ -211,7 +211,7 @@ ${custom_css}
   <!-- Main Footer -->
   <footer class="main-footer">
     <!-- Default to the left -->
-    <strong>Copyright &copy; 2017 JASON.</strong> All rights reserved.
+    <strong>Copyright &copy; 2023 PLUS.</strong> All rights reserved.
   </footer>
 
 </div>
