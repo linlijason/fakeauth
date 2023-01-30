@@ -1,6 +1,5 @@
 package ai.advance.jumei.session;
 
-import ai.advance.jumei.util.AuthUtils;
 import ai.advance.jumei.util.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

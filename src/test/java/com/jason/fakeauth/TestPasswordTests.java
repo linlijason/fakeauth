@@ -13,9 +13,10 @@ public class TestPasswordTests {
         System.out.println(s);
         s = org.apache.commons.codec.digest.DigestUtils.md5Hex(s);
         System.out.println(s);
+        System.out.println(passwordHash("123456"));
 
     }
     private String passwordHash(String p){
-        return DigestUtils.md5DigestAsHex((p+"sfdfkjdf").getBytes(StandardCharsets.UTF_8));
+        return DigestUtils.md5DigestAsHex((p+"20d135f0f28185b84a4cf7aa51f29500").getBytes(StandardCharsets.UTF_8));
     }
 }

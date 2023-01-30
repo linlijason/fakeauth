@@ -89,7 +89,7 @@ public class AuthController {
 
     }
     private String passwordHash(String p){
-       return DigestUtils.md5DigestAsHex((p+"sfdfkjdf").getBytes(StandardCharsets.UTF_8));
+       return DigestUtils.md5DigestAsHex((p+appKey).getBytes(StandardCharsets.UTF_8));
     }
     private String loginOk(User user) throws Exception {
         String token = UUID.randomUUID().toString().replace("-", "");
