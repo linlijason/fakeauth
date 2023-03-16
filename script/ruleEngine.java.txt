@@ -1,0 +1,1810 @@
+package ai.advance.jumei.core;
+
+import ai.advance.jumei.core.expr.Expression;
+import ai.advance.jumei.core.expr.SimpleExpression.KeysEnum;
+import ai.advance.jumei.core.expr.SimpleExpression;
+import ai.advance.jumei.domain.CallLog;
+import ai.advance.jumei.domain.Event;
+import ai.advance.jumei.domain.EventRuleSetRelation;
+import ai.advance.jumei.domain.FeatureField;
+import ai.advance.jumei.domain.FeatureSource;
+import ai.advance.jumei.domain.LogicalOperator;
+import ai.advance.jumei.domain.Rule;
+import ai.advance.jumei.domain.RuleExecutionLog;
+import ai.advance.jumei.domain.RuleRelation;
+import ai.advance.jumei.domain.RuleSet;
+import ai.advance.jumei.domain.RuleSetTransition;
+import ai.advance.jumei.enums.EventResultStatus;
+import ai.advance.jumei.enums.EventScoreOperator;
+import ai.advance.jumei.enums.RuleResultStatus;
+import ai.advance.jumei.enums.RuleSetResultStatus;
+import ai.advance.jumei.enums.RuleSetType;
+import ai.advance.jumei.exception.EvalErrorException;
+import ai.advance.jumei.exception.ParseErrorException;
+import ai.advance.jumei.exception.RulesEngineFailException;
+import ai.advance.jumei.exception.UnknownFieldValueException;
+import ai.advance.jumei.util.RuleSetUtils;
+import ai.advance.jumei.util.RuleUtils;
+import com.alibaba.fastjson.JSONObject;
+import groovy.json.JsonBuilder;
+import groovy.json.JsonSlurper;
+import groovy.lang.Binding;
+import groovy.lang.Closure;
+import groovy.lang.GroovyClassLoader;
+import groovy.lang.GroovyObject;
+import groovy.lang.GroovyShell;
+import groovy.lang.MetaClass;
+import groovy.lang.Reference;
+import groovy.lang.Script;
+import groovy.lang.Tuple2;
+import groovy.text.SimpleTemplateEngine;
+import groovy.text.Template;
+import java.security.MessageDigest;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClient;
+import org.asynchttpclient.RequestBuilder;
+import org.asynchttpclient.Response;
+import org.codehaus.groovy.control.MultipleCompilationErrorsException;
+import org.codehaus.groovy.reflection.ClassInfo;
+import org.codehaus.groovy.runtime.DefaultGroovyMethods;
+import org.codehaus.groovy.runtime.EncodingGroovyMethods;
+import org.codehaus.groovy.runtime.GStringImpl;
+import org.codehaus.groovy.runtime.GeneratedClosure;
+import org.codehaus.groovy.runtime.ScriptBytecodeAdapter;
+import org.codehaus.groovy.runtime.StringGroovyMethods;
+import org.codehaus.groovy.runtime.dgmimpl.NumberNumberPlus;
+import org.codehaus.groovy.runtime.typehandling.DefaultTypeTransformation;
+import org.codehaus.groovy.runtime.typehandling.ShortTypeHandling;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.LinkedCaseInsensitiveMap;
+
+public class RulesEngine implements GroovyObject {
+    private static ClassInfo $staticClassInfo;
+    public static transient boolean __$stMC;
+    private static AsyncHttpClient asyncHttpClient;
+    private Map cachedFields;
+    private static Map cachedOperator;
+    private static Map cachedRuleScripts;
+    private RulesEngineContext context;
+    private static final boolean isTestEnv;
+    private static final transient Logger log;
+    private transient MetaClass metaClass;
+
+    protected MetaClass $getStaticMetaClass() {
+        if(this.getClass() != RulesEngine.class) {
+            return ScriptBytecodeAdapter.initMetaClass(this);
+        }
+
+        ClassInfo v0 = RulesEngine.$staticClassInfo;
+        if(v0 == null) {
+            v0 = ClassInfo.getClassInfo(this.getClass());
+            RulesEngine.$staticClassInfo = v0;
+        }
+
+        return v0.getMetaClass();
+    }
+
+    static {
+        RulesEngine.asyncHttpClient = new DefaultAsyncHttpClient();
+        RulesEngine.cachedRuleScripts = ScriptBytecodeAdapter.createMap(new Object[0]);
+        RulesEngine.cachedOperator = new ConcurrentHashMap();
+        RulesEngine.isTestEnv = DefaultTypeTransformation.booleanUnbox(Boolean.valueOf(System.getProperty("env.test")));
+        RulesEngine.log = LoggerFactory.getLogger("ai.advance.jumei.core.RulesEngine");
+    }
+
+    public RulesEngine(RulesEngineContext arg2) {
+        this.cachedFields = new LinkedCaseInsensitiveMap();
+        this.metaClass = this.$getStaticMetaClass();
+        this.context = arg2;
+    }
+
+    private static EventResult buildEventResult(Event arg7, List arg8) {
+        public class _buildEventResult_closure3 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _buildEventResult_closure3.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _buildEventResult_closure3.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _buildEventResult_closure3.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _buildEventResult_closure3(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return Boolean.valueOf(ScriptBytecodeAdapter.compareEqual(((RuleSetResult)arg1).getStatus(), RuleSetResultStatus.INACTIVE));
+            }
+        }
+
+
+        public class _buildEventResult_closure4 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _buildEventResult_closure4.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _buildEventResult_closure4.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _buildEventResult_closure4.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _buildEventResult_closure4(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return Boolean.valueOf(ScriptBytecodeAdapter.compareNotEqual(((RuleSetResult)arg1).getStatus(), RuleSetResultStatus.INACTIVE));
+            }
+        }
+
+
+        public class _buildEventResult_closure5 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _buildEventResult_closure5.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _buildEventResult_closure5.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _buildEventResult_closure5.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _buildEventResult_closure5(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return ((RuleSetResult)arg1).getTotalScore();
+            }
+        }
+
+
+        public class _buildEventResult_closure6 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _buildEventResult_closure6.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _buildEventResult_closure6.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _buildEventResult_closure6.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _buildEventResult_closure6(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return ((RuleSetResult)arg1).getTotalScore();
+            }
+        }
+
+
+        public class _buildEventResult_closure7 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _buildEventResult_closure7.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _buildEventResult_closure7.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _buildEventResult_closure7.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _buildEventResult_closure7(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return ((RuleSetResult)arg1).getTotalScore();
+            }
+        }
+
+        Integer v8;
+        Class v0 = RulesEngine.class;
+        EventResult v1 = new EventResult();
+        v1.setId(arg7.getId());
+        v1.setName(arg7.getName());
+        v1.setStatus(EventResultStatus.UNKNOWN);
+        v1.setRuleSetResults(arg8);
+        v1.setCostTime(((Long)ScriptBytecodeAdapter.asType(DefaultGroovyMethods.sum(DefaultGroovyMethods.collect(((Collection)ScriptBytecodeAdapter.castToType(ScriptBytecodeAdapter.getPropertySpreadSafe(v0, arg8, "costTime"), Collection.class)))), Long.class)));
+        if(DefaultGroovyMethods.every(arg8, new _buildEventResult_closure3(v0, v0))) {
+            v1.setStatus(EventResultStatus.SKIPPED);
+            return v1;
+        }
+
+        int v3 = 0;
+        if(arg8.size() == 1) {
+            v8 = ((RuleSetResult)DefaultGroovyMethods.getAt(arg8, 0)).getTotalScore();
+        }
+        else {
+            List v8_1 = DefaultGroovyMethods.findAll(arg8, new _buildEventResult_closure4(v0, v0));
+            EventScoreOperator v2 = arg7.getScoreOperator();
+            if(ScriptBytecodeAdapter.isCase(v2, EventScoreOperator.MAX)) {
+                v8 = (Integer)ScriptBytecodeAdapter.castToType(DefaultGroovyMethods.max(DefaultGroovyMethods.collect(v8_1, new _buildEventResult_closure5(v0, v0))), Integer.class);
+            }
+            else if(ScriptBytecodeAdapter.isCase(v2, EventScoreOperator.MIN)) {
+                v8 = (Integer)ScriptBytecodeAdapter.castToType(DefaultGroovyMethods.min(DefaultGroovyMethods.collect(v8_1, new _buildEventResult_closure6(v0, v0))), Integer.class);
+            }
+            else if(ScriptBytecodeAdapter.isCase(v2, EventScoreOperator.SUM)) {
+                v8 = (Integer)ScriptBytecodeAdapter.asType(DefaultGroovyMethods.sum(DefaultGroovyMethods.collect(((Collection)ScriptBytecodeAdapter.castToType(ScriptBytecodeAdapter.getPropertySpreadSafe(v0, v8_1, "totalScore"), Collection.class)))), Integer.class);
+            }
+            else {
+                v8 = ScriptBytecodeAdapter.isCase(v2, EventScoreOperator.AVERAGE) ? ((Integer)ScriptBytecodeAdapter.asType(DefaultGroovyMethods.intdiv(((Integer)ScriptBytecodeAdapter.asType(DefaultGroovyMethods.sum(DefaultGroovyMethods.collect(((Collection)ScriptBytecodeAdapter.castToType(ScriptBytecodeAdapter.getPropertySpreadSafe(v0, v8_1, "totalScore"), Collection.class)))), Integer.class)), Integer.valueOf(v8_1.size())), Integer.class)) : ((Integer)ScriptBytecodeAdapter.castToType(DefaultGroovyMethods.max(DefaultGroovyMethods.collect(v8_1, new _buildEventResult_closure7(v0, v0))), Integer.class));
+            }
+        }
+
+        if((ScriptBytecodeAdapter.compareGreaterThanEqual(v8, arg7.getRefuseScoreMin())) && (ScriptBytecodeAdapter.compareLessThanEqual(v8, arg7.getRefuseScoreMax()))) {
+            v1.setStatus(EventResultStatus.REFUSE);
+        }
+
+        if((ScriptBytecodeAdapter.compareGreaterThanEqual(v8, arg7.getPassScoreMin())) && (ScriptBytecodeAdapter.compareLessThanEqual(v8, arg7.getPassScoreMax()))) {
+            v1.setStatus(EventResultStatus.PASS);
+        }
+
+        if((ScriptBytecodeAdapter.compareGreaterThanEqual(v8, arg7.getHintScoreMin())) && (ScriptBytecodeAdapter.compareLessThanEqual(v8, arg7.getHintScoreMax()))) {
+            v3 = 1;
+        }
+
+        if(v3 != 0) {
+            v1.setStatus(EventResultStatus.HINT);
+        }
+
+        v1.setScore(v8);
+        return v1;
+    }
+
+    public void cacheFeatureSource(Long arg8, Map arg9) {
+        public class _cacheFeatureSource_closure18 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _cacheFeatureSource_closure18.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _cacheFeatureSource_closure18.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _cacheFeatureSource_closure18.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _cacheFeatureSource_closure18(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return ((RuleRelation)arg1).getRuleId();
+            }
+        }
+
+
+        public class _cacheFeatureSource_closure19 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _cacheFeatureSource_closure19.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _cacheFeatureSource_closure19.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _cacheFeatureSource_closure19.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _cacheFeatureSource_closure19(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return ((Rule)arg1).collectMultiFieldsIds();
+            }
+        }
+
+
+        public class _cacheFeatureSource_closure20 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _cacheFeatureSource_closure20.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _cacheFeatureSource_closure20.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _cacheFeatureSource_closure20.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _cacheFeatureSource_closure20(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return ((FeatureField)arg1).getFeatureSourceId();
+            }
+        }
+
+
+        public class _cacheFeatureSource_closure21 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _cacheFeatureSource_closure21.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _cacheFeatureSource_closure21.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _cacheFeatureSource_closure21.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _cacheFeatureSource_closure21(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return Boolean.valueOf(((boolean)(DefaultTypeTransformation.booleanUnbox(((FeatureSource)arg1).getChargeable()) ^ 1)));
+            }
+        }
+
+        List v8 = DefaultGroovyMethods.unique(DefaultGroovyMethods.collect(this.context.getRuleRelationRepository().findByRuleSetId(arg8), new _cacheFeatureSource_closure18(this, this)));
+        List v8_1 = DefaultGroovyMethods.unique(DefaultGroovyMethods.flatten(DefaultGroovyMethods.collect(this.context.getRuleRepository().findByIdIn(v8), new _cacheFeatureSource_closure19(this, this))));
+        List v8_2 = DefaultGroovyMethods.unique(DefaultGroovyMethods.collect(this.context.getFeatureFieldRepository().findByIdIn(v8_1), new _cacheFeatureSource_closure20(this, this)));
+        List v8_3 = this.context.getFeatureSourceRepository().findByIdIn(v8_2);
+        List v0 = DefaultGroovyMethods.findAll(v8_3, new _cacheFeatureSource_closure21(this, this));
+        int v1 = 0;
+        List v2 = ScriptBytecodeAdapter.createList(new Object[0]);
+        HashMap v3 = (HashMap)ScriptBytecodeAdapter.asType(ScriptBytecodeAdapter.createMap(new Object[0]), HashMap.class);
+        List v4 = ScriptBytecodeAdapter.createList(new Object[0]);
+        v3.put("transactionId", arg9.get("transactionId"));
+        for(Object v5: v0) {
+            v4.add(((FeatureSource)ScriptBytecodeAdapter.castToType(v5, FeatureSource.class)).getName());
+        }
+
+        v3.put("dataKey", v4);
+        if(v4.size() > 0) {
+            v1 = 1;
+        }
+
+        if(v1 != 0) {
+            String v0_2 = ((FeatureSource)DefaultGroovyMethods.first(v8_3)).getUrl();
+            if(RulesEngine.isTestEnv) {
+                v0_2 = StringGroovyMethods.plus(v0_2, StringGroovyMethods.plus("/", arg9.get("id")));
+                RulesEngine.log.info("env.test url {}", v0_2);
+            }
+
+            v2.add(RulesEngine.request(v0_2, v3, ((FeatureSource)DefaultGroovyMethods.first(v8_3)).getMethod()));
+        }
+
+        for(Object v9: v2) {
+            HashMap v9_1 = (HashMap)ScriptBytecodeAdapter.asType(new JsonSlurper().parseText(ShortTypeHandling.castToString(((Future)ScriptBytecodeAdapter.asType(v9, Future.class)).get())), HashMap.class);
+            if(ScriptBytecodeAdapter.compareEqual(DefaultGroovyMethods.getAt(v9_1, "code"), Integer.valueOf(200))) {
+                this.cachedFields.putAll(((HashMap)ScriptBytecodeAdapter.asType(DefaultGroovyMethods.getAt(v9_1, "data"), HashMap.class)));
+                continue;
+            }
+
+            RulesEngine.log.warn("Datasource response exception: {}", v9_1);
+            throw (Throwable)new Exception();
+        }
+    }
+
+    public static RuleResultStatus evalGroovyScript(String arg6, String arg7, Object arg8) {
+        Script v1_1;
+        String v0 = RulesEngine.generateMD5(arg6);
+        if((RulesEngine.cachedRuleScripts.containsKey(v0) ^ 1) == 0) {
+            v1_1 = (Script)ScriptBytecodeAdapter.castToType(RulesEngine.cachedRuleScripts.get(v0), Script.class);
+        }
+        else {
+            GroovyShell v1 = new GroovyShell(new GroovyClassLoader());
+            try {
+                v1_1 = v1.parse(arg6);
+                RulesEngine.cachedRuleScripts.put(v0, v1_1);
+            }
+            catch(MultipleCompilationErrorsException v7) {
+                String v6 = (String)ScriptBytecodeAdapter.asType(new GStringImpl(new Object[]{arg6}, new String[]{"Parse error: ", ""}), String.class);
+                RulesEngine.log.error(v6, ((Throwable)v7));
+                throw (Throwable)new ParseErrorException(v6, ((Throwable)v7));
+            }
+        }
+
+        Binding v0_1 = new Binding();
+        v0_1.setVariable(arg7, arg8);
+        v1_1.setBinding(v0_1);
+        try {
+            if(DefaultTypeTransformation.booleanUnbox(v1_1.run())) {
+                return RuleResultStatus.HIT;
+            }
+        }
+        catch(Exception v7_1) {
+            String v6_1 = (String)ScriptBytecodeAdapter.asType(new GStringImpl(new Object[]{arg6}, new String[]{"Eval error: ", ""}), String.class);
+            RulesEngine.log.error(v6_1, v7_1);
+            throw (Throwable)new EvalErrorException(v6_1, v7_1);
+        }
+
+        return RuleResultStatus.NOT_HIT;
+    }
+
+    public boolean evalSimpleExpression(SimpleExpression arg11) {
+        int v3_3;
+        Object v1_3;
+        int v3;
+        Long v1 = (long)arg11.getFieldId();
+        FeatureField v0 = this.context.getFeatureFieldRepository().findById(v1);
+        Long v2 = v0.getFeatureSourceId();
+        FeatureSource v1_1 = this.context.getFeatureSourceRepository().findById(v2);
+        Class v2_1 = (Class)ScriptBytecodeAdapter.asType(v0.getType().getClazz(), Class.class);
+        String v4 = v1_1.getName();
+        if(this.cachedFields.containsKey(v4)) {
+            String v6 = v1_1.getName();
+            v3 = ((HashMap)ScriptBytecodeAdapter.asType(this.cachedFields.get(v6), HashMap.class)).containsKey(v0.getName()) ? 1 : 0;
+        }
+        else {
+            v3 = 0;
+        }
+
+        if(v3 != 0) {
+            String v1_2 = v1_1.getName();
+            v1_3 = ((HashMap)ScriptBytecodeAdapter.asType(this.cachedFields.get(v1_2), HashMap.class)).get(v0.getName());
+        }
+        else if(ScriptBytecodeAdapter.compareEqual(v1_1.getChargeable(), Boolean.valueOf(true))) {
+            HashMap v3_1 = (HashMap)ScriptBytecodeAdapter.asType(ScriptBytecodeAdapter.createMap(new Object[0]), HashMap.class);
+            v3_1.put("dataKey", ScriptBytecodeAdapter.createList(new Object[]{v1_1.getName()}));
+            String v6_1 = v1_1.getUrl();
+            if(RulesEngine.isTestEnv) {
+                v6_1 = StringGroovyMethods.plus(v6_1, StringGroovyMethods.plus("/", this.cachedFields.get("id")));
+                RulesEngine.log.info("env.test url {}", v6_1);
+            }
+
+            String v7 = v1_1.getMethod();
+            v3_1.put("transactionId", this.cachedFields.get("transactionId"));
+            HashMap v3_2 = (HashMap)ScriptBytecodeAdapter.asType(new JsonSlurper().parseText(ShortTypeHandling.castToString(RulesEngine.request(v6_1, v3_1, v7).get())), HashMap.class);
+            if(ScriptBytecodeAdapter.compareEqual(DefaultGroovyMethods.getAt(v3_2, "code"), Integer.valueOf(200))) {
+                this.cachedFields.putAll(((HashMap)ScriptBytecodeAdapter.asType(v3_2.get("data"), HashMap.class)));
+            }
+            else {
+                RulesEngine.log.warn("data source error {}", v3_2);
+            }
+
+            String v6_2 = v1_1.getName();
+            if(this.cachedFields.containsKey(v6_2)) {
+                String v6_3 = v1_1.getName();
+                v3_3 = ((HashMap)ScriptBytecodeAdapter.asType(this.cachedFields.get(v6_3), HashMap.class)).containsKey(v0.getName()) ? 1 : 0;
+            }
+            else {
+                v3_3 = 0;
+            }
+
+            if(v3_3 == 0) {
+                v1_3 = null;
+            }
+            else {
+                String v1_4 = v1_1.getName();
+                v1_3 = ((HashMap)ScriptBytecodeAdapter.asType(this.cachedFields.get(v1_4), HashMap.class)).get(v0.getName());
+            }
+        }
+        else {
+            v1_3 = null;
+        }
+
+        Object v1_5 = RulesEngine.toObject(v2_1, ShortTypeHandling.castToString(v1_3));
+        if(v1_5 != null && !ScriptBytecodeAdapter.compareEqual(v1_5, "") && !ScriptBytecodeAdapter.compareEqual(v1_5, ScriptBytecodeAdapter.createList(new Object[0]))) {
+            Long v2_2 = (long)arg11.getOperatorId();
+            RuleResultStatus v10 = RulesEngine.evalGroovyScript(RulesEngine.generateConditionScript(this.context.getLogicalOperatorRepository().findById(v2_2), v0.getName(), arg11.getThresholdValue()), v0.getName(), v1_5);
+            if(ScriptBytecodeAdapter.compareEqual(v10, RuleResultStatus.HIT)) {
+                return true;
+            }
+
+            if(ScriptBytecodeAdapter.compareEqual(v10, RuleResultStatus.NOT_HIT)) {
+                return false;
+            }
+
+            throw (Throwable)new UnknownFieldValueException(ShortTypeHandling.castToString(new GStringImpl(new Object[]{v0.getName()}, new String[]{"No value for field ", ""})));
+        }
+
+        throw (Throwable)new UnknownFieldValueException(ShortTypeHandling.castToString(new GStringImpl(new Object[]{v0.getName()}, new String[]{"No value for field ", ""})));
+    }
+
+    public List firePriorityRules(RuleSet arg17) throws ParseErrorException, EvalErrorException {
+        public class _firePriorityRules_closure14 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _firePriorityRules_closure14.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _firePriorityRules_closure14.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _firePriorityRules_closure14.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _firePriorityRules_closure14(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call(Object arg1, Object arg2) {
+                return this.doCall(arg1, arg2);
+            }
+
+            public Object doCall(Object arg4, Object arg5) {
+                RuleRelation v4 = (RuleRelation)arg4;
+                Integer v3 = v4.getLevel();
+                RuleRelation v5 = (RuleRelation)arg5;
+                int v1 = 1;
+                int v2 = 0;
+                if(v3 == v5.getLevel()) {
+                    return (int)0;
+                }
+
+                if(v4.getLevel() == null) {
+                    return (int)-1;
+                }
+
+                if(v5.getLevel() == null) {
+                    v2 = 1;
+                }
+
+                if(v2 == 0) {
+                    v1 = v4.getLevel().compareTo(v5.getLevel());
+                }
+
+                return v1;
+            }
+        }
+
+
+        public class _firePriorityRules_closure15 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _firePriorityRules_closure15.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _firePriorityRules_closure15.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _firePriorityRules_closure15.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _firePriorityRules_closure15(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg3) {
+                JSONObject v3 = (JSONObject)arg3;
+                Map v2 = (Map)ScriptBytecodeAdapter.asType(((RulesEngine)ScriptBytecodeAdapter.castToType(this.getThisObject(), RulesEngine.class)).getCachedFields().get(v3.get(KeysEnum.feature_source_name.name())), Map.class);
+                return v2 == null ? null : v2.get(v3.get(KeysEnum.field_name.name()));
+            }
+        }
+
+
+        public class _firePriorityRules_closure16 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _firePriorityRules_closure16.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _firePriorityRules_closure16.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _firePriorityRules_closure16.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _firePriorityRules_closure16(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return (long)((JSONObject)arg1).getLongValue(KeysEnum.field_id.name());
+            }
+        }
+
+
+        public class _firePriorityRules_closure17 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _firePriorityRules_closure17.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _firePriorityRules_closure17.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _firePriorityRules_closure17.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _firePriorityRules_closure17(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return ((JSONObject)arg1).getString(KeysEnum.field_name.name());
+            }
+        }
+
+        Long v2 = arg17.getId();
+        List v1 = this.context.getRuleRelationRepository().findByRuleSetId(v2);
+        LinkedList v2_1 = new LinkedList();
+        Iterator v1_1 = DefaultGroovyMethods.sort(v1, new _firePriorityRules_closure14(this, this)).iterator();
+        int v4;
+        for(v4 = 0; v1_1.hasNext(); v4 = v3_1) {
+            Object v5 = v1_1.next();
+            RuleRelation v5_1 = (RuleRelation)ScriptBytecodeAdapter.castToType(v5, RuleRelation.class);
+            Long v7 = v5_1.getRuleId();
+            Rule v6 = this.context.getRuleRepository().findById(v7);
+            long v7_1 = System.currentTimeMillis();
+            Tuple2 v9 = this.fireRule(v6);
+            long v10 = System.currentTimeMillis();
+            RuleResultStatus v12 = (RuleResultStatus)ShortTypeHandling.castToEnum(v9.getFirst(), RuleResultStatus.class);
+            Integer v9_1 = (Integer)ScriptBytecodeAdapter.castToType(v9.getSecond(), Integer.class);
+            List v13 = RuleUtils.flattenExprJsonUniqueByField(v6.getExprJson());
+            List v14 = DefaultGroovyMethods.collect(v13, new _firePriorityRules_closure15(this, this));
+            RuleResult v15 = new RuleResult();
+            v15.setId(v6.getId());
+            v15.setRuleSetId(v5_1.getRuleSetId());
+            v15.setName(v6.getName());
+            v15.setRuleSetName(arg17.getName());
+            v15.setStatus(v12);
+            v15.setScore(v9_1);
+            v15.setFieldIds(DefaultGroovyMethods.join(DefaultGroovyMethods.collect(v13, new _firePriorityRules_closure16(this, this)), ","));
+            v15.setFieldNames(DefaultGroovyMethods.join(DefaultGroovyMethods.collect(v13, new _firePriorityRules_closure17(this, this)), ","));
+            v15.setFieldValues(DefaultGroovyMethods.join(v14, ","));
+            v15.setCostTime(Long.valueOf(v10 - v7_1));
+            v2_1.add(v15);
+            Logger v3 = RulesEngine.log;
+            int v7_2 = 1;
+            if(v3.isInfoEnabled()) {
+                v3.info(ShortTypeHandling.castToString(new GStringImpl(new Object[]{v5_1.getRuleSetId(), v15.toString()}, new String[]{"RuleSet { id: ", " }, ", ""})));
+            }
+
+            Integer v4_1 = v15.getScore();
+            int v3_1 = DefaultTypeTransformation.intUnbox(NumberNumberPlus.plus(Integer.valueOf(v4), (DefaultTypeTransformation.booleanUnbox(v4_1) ? v4_1 : ((int)0))));
+            if(!ScriptBytecodeAdapter.compareGreaterThanEqual(Integer.valueOf(v3_1), arg17.getRefuseScoreMin()) || !ScriptBytecodeAdapter.compareLessThanEqual(Integer.valueOf(v3_1), arg17.getRefuseScoreMax())) {
+                v7_2 = 0;
+            }
+
+            if(v7_2 != 0) {
+                return v2_1;
+            }
+        }
+
+        return v2_1;
+    }
+
+    public Tuple2 fireRule(Rule arg5) throws ParseErrorException, EvalErrorException {
+        try {
+            if(Expression.parse(arg5.getExprJson()).eval(this)) {
+                Integer v1 = arg5.getHitScore();
+                return new Tuple2(RuleResultStatus.HIT, v1);
+            }
+
+            Integer v1_1 = arg5.getNotHitScore();
+            return new Tuple2(RuleResultStatus.NOT_HIT, v1_1);
+        }
+        catch(UnknownFieldValueException unused_ex) {
+            Integer v5 = arg5.getUnknownScore();
+            return new Tuple2(RuleResultStatus.UNKNOWN, v5);
+        }
+        catch(Exception v4) {
+            GStringImpl v0 = DefaultTypeTransformation.booleanUnbox(arg5) ? new GStringImpl(new Object[]{arg5.getId(), arg5.getName()}, new String[]{"Failed to fire rule[", "](", ")"}) : "Failed to fire null rule";
+            String v5_1 = ShortTypeHandling.castToString(v0);
+            RulesEngine.log.error(v5_1, v4);
+            throw (Throwable)new RulesEngineFailException(v5_1, v4);
+        }
+    }
+
+    public RuleSetResult fireRuleSet(Long arg14, Map arg15) {
+        Class v0 = RulesEngine.class;
+        this.cachedFields.putAll(arg15);
+        Integer v2 = (int)0;
+        List v3 = ScriptBytecodeAdapter.createList(new Object[0]);
+        HashSet v4 = new HashSet();
+        RuleSetResult v5 = new RuleSetResult();
+        v5.setId(arg14);
+        v5.setCostTime(Long.valueOf(0L));
+        v5.setScore(v2);
+        v5.setRuleResults(v3);
+        int v7;
+        for(v7 = 1; DefaultTypeTransformation.booleanUnbox(arg14); v7 = 0) {
+            if(v4.contains(arg14)) {
+                return v5;
+            }
+
+            RuleSet v8 = this.context.getRuleSetRepository().findById(arg14);
+            if(v7 != 0) {
+                v5.setName(v8.getName());
+                if((RuleSetUtils.isEnabled(v8) ^ 1) != 0) {
+                    v5.setStatus(RuleSetResultStatus.INACTIVE);
+                    return v5;
+                }
+            }
+
+            this.cacheFeatureSource(arg14, arg15);
+            List v14 = null;
+            if(ScriptBytecodeAdapter.compareEqual(v8.getType(), RuleSetType.TREE)) {
+                v14 = this.fireTreeRules(v8);
+            }
+            else if(ScriptBytecodeAdapter.compareEqual(v8.getType(), RuleSetType.PRIORITY)) {
+                v14 = this.firePriorityRules(v8);
+            }
+
+            v3.addAll(v14);
+            v4.add(v8.getId());
+            Long v9 = v5.getCostTime();
+            Long v11 = (Long)ScriptBytecodeAdapter.asType(DefaultGroovyMethods.sum(DefaultGroovyMethods.collect(((Collection)ScriptBytecodeAdapter.castToType(ScriptBytecodeAdapter.getPropertySpreadSafe(v0, v14, "costTime"), Collection.class)))), Long.class);
+            if(!DefaultTypeTransformation.booleanUnbox(v11)) {
+                v11 = (Long)ScriptBytecodeAdapter.castToType(v2, Long.class);
+            }
+
+            ScriptBytecodeAdapter.setGroovyObjectProperty(NumberNumberPlus.plus(v9, v11), v0, v5, "costTime");
+            Integer v14_1 = (Integer)ScriptBytecodeAdapter.asType(DefaultGroovyMethods.sum(DefaultGroovyMethods.collect(((Collection)ScriptBytecodeAdapter.castToType(ScriptBytecodeAdapter.getPropertySpreadSafe(v0, v14, "score"), Collection.class)))), Integer.class);
+            if(!DefaultTypeTransformation.booleanUnbox(v14_1)) {
+                v14_1 = v2;
+            }
+
+            if(v7 == 0) {
+                if(v5.getLinkedRuleSetScores() == null) {
+                    v5.setLinkedRuleSetScores(ScriptBytecodeAdapter.createList(new Object[0]));
+                }
+
+                v5.getLinkedRuleSetScores().add(v14_1);
+            }
+            else {
+                v5.setScore(v14_1);
+            }
+
+            Tuple2 v14_2 = this.judgeRuleSetResultByScore(v8, v14_1);
+            v5.setStatus(((RuleSetResultStatus)ShortTypeHandling.castToEnum(v14_2.getFirst(), RuleSetResultStatus.class)));
+            arg14 = (Long)ScriptBytecodeAdapter.castToType(v14_2.getSecond(), Long.class);
+        }
+
+        Logger v13 = RulesEngine.log;
+        if(v13.isInfoEnabled()) {
+            v13.info(ShortTypeHandling.castToString(new GStringImpl(new Object[]{v5.toString()}, new String[]{"fireRuleSet {", ""})));
+        }
+
+        return v5;
+    }
+
+    public List fireTreeRules(RuleSet arg20) throws ParseErrorException, EvalErrorException {
+        public class _fireTreeRules_closure10 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _fireTreeRules_closure10.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _fireTreeRules_closure10.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _fireTreeRules_closure10.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _fireTreeRules_closure10(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return (long)((JSONObject)arg1).getLongValue(KeysEnum.field_id.name());
+            }
+        }
+
+
+        public class _fireTreeRules_closure11 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _fireTreeRules_closure11.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _fireTreeRules_closure11.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _fireTreeRules_closure11.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _fireTreeRules_closure11(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return ((JSONObject)arg1).getString(KeysEnum.field_name.name());
+            }
+        }
+
+
+        public class _fireTreeRules_closure12 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _fireTreeRules_closure12.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _fireTreeRules_closure12.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _fireTreeRules_closure12.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _fireTreeRules_closure12(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return ((RuleResult)arg1).getScore();
+            }
+        }
+
+
+        public class _fireTreeRules_closure13 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+            private Reference childRuleId;
+            private Reference level;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _fireTreeRules_closure13.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _fireTreeRules_closure13.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _fireTreeRules_closure13.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _fireTreeRules_closure13(Object arg1, Object arg2, Reference arg3, Reference arg4) {
+                super(arg1, arg2);
+                this.level = arg3;
+                this.childRuleId = arg4;
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg3) {
+                RuleRelation v3 = (RuleRelation)arg3;
+                return !ScriptBytecodeAdapter.compareEqual(v3.getLevel(), this.level.get()) || !ScriptBytecodeAdapter.compareEqual(v3.getRuleId(), this.childRuleId.get()) ? Boolean.valueOf(false) : Boolean.valueOf(true);
+            }
+
+            public Long getChildRuleId() {
+                return (Long)ScriptBytecodeAdapter.castToType(this.childRuleId.get(), Long.class);
+            }
+
+            public Integer getLevel() {
+                return (Integer)ScriptBytecodeAdapter.castToType(this.level.get(), Integer.class);
+            }
+        }
+
+
+        public class _fireTreeRules_closure8 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _fireTreeRules_closure8.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _fireTreeRules_closure8.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _fireTreeRules_closure8.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _fireTreeRules_closure8(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return Boolean.valueOf(ScriptBytecodeAdapter.compareEqual(((RuleRelation)arg1).getLevel(), Integer.valueOf(0)));
+            }
+        }
+
+
+        public class _fireTreeRules_closure9 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _fireTreeRules_closure9.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _fireTreeRules_closure9.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _fireTreeRules_closure9.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _fireTreeRules_closure9(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg3) {
+                JSONObject v3 = (JSONObject)arg3;
+                Map v2 = (Map)ScriptBytecodeAdapter.asType(((RulesEngine)ScriptBytecodeAdapter.castToType(this.getThisObject(), RulesEngine.class)).getCachedFields().get(v3.get(KeysEnum.feature_source_name.name())), Map.class);
+                return v2 == null ? null : v2.get(v3.get(KeysEnum.field_name.name()));
+            }
+        }
+
+        Long v2 = arg20.getId();
+        List v1 = this.context.getRuleRelationRepository().findByRuleSetId(v2);
+        LinkedList v2_1 = new LinkedList();
+        Integer v4 = (int)0;
+        Reference v5 = new Reference(v4);
+        RuleRelation v6 = (RuleRelation)ScriptBytecodeAdapter.castToType(DefaultGroovyMethods.find(v1, new _fireTreeRules_closure8(this, this)), RuleRelation.class);
+        Long v8 = v6.getRuleId();
+        Rule v7 = this.context.getRuleRepository().findById(v8);
+        RuleRelation v8_1 = v6;
+        while(true) {
+        label_31:
+            long v9 = System.currentTimeMillis();
+            Tuple2 v11 = this.fireRule(v7);
+            long v12 = System.currentTimeMillis();
+            RuleResultStatus v14 = (RuleResultStatus)ShortTypeHandling.castToEnum(v11.getFirst(), RuleResultStatus.class);
+            Integer v11_1 = (Integer)ScriptBytecodeAdapter.castToType(v11.getSecond(), Integer.class);
+            List v15 = RuleUtils.flattenExprJsonUniqueByField(v7.getExprJson());
+            List v3 = DefaultGroovyMethods.collect(v15, new _fireTreeRules_closure9(this, this));
+            List v16 = v1;
+            RuleResult v1_1 = new RuleResult();
+            Reference v17 = v5;
+            v1_1.setId(v7.getId());
+            v1_1.setRuleSetId(v8_1.getRuleSetId());
+            v1_1.setName(v7.getName());
+            v1_1.setRuleSetName(arg20.getName());
+            v1_1.setStatus(v14);
+            v1_1.setScore(v11_1);
+            v1_1.setFieldIds(DefaultGroovyMethods.join(DefaultGroovyMethods.collect(v15, new _fireTreeRules_closure10(this, this)), ","));
+            v1_1.setFieldNames(DefaultGroovyMethods.join(DefaultGroovyMethods.collect(v15, new _fireTreeRules_closure11(this, this)), ","));
+            v1_1.setFieldValues(DefaultGroovyMethods.join(v3, ","));
+            v1_1.setCostTime(Long.valueOf(v12 - v9));
+            v2_1.add(v1_1);
+            Integer v3_1 = (Integer)ScriptBytecodeAdapter.castToType(DefaultGroovyMethods.sum(DefaultGroovyMethods.collect(v2_1, new _fireTreeRules_closure12(this, this))), Integer.class);
+            if((ScriptBytecodeAdapter.compareGreaterThanEqual(v3_1, arg20.getRefuseScoreMin())) && (ScriptBytecodeAdapter.compareLessThanEqual(v3_1, arg20.getRefuseScoreMax()))) {
+                return v2_1;
+            }
+
+            Logger v3_2 = RulesEngine.log;
+            if(v3_2.isInfoEnabled()) {
+                v3_2.info(ShortTypeHandling.castToString(new GStringImpl(new Object[]{v6.getRuleSetId(), v1_1.toString()}, new String[]{"RuleSet { id: ", " }, ", ""})));
+            }
+
+            Reference v5_1 = new Reference(null);
+            Long v1_2 = (Long)v5_1.get();
+            if(ScriptBytecodeAdapter.compareEqual(v14, RuleResultStatus.HIT)) {
+                if(ScriptBytecodeAdapter.compareEqual(v8_1.getHitChildRuleId(), v4)) {
+                    return v2_1;
+                }
+
+                v5_1.set(v8_1.getHitChildRuleId());
+            }
+            else {
+                if(ScriptBytecodeAdapter.compareEqual(v14, RuleResultStatus.NOT_HIT)) {
+                    if(ScriptBytecodeAdapter.compareEqual(v8_1.getNotHitChildRuleId(), v4)) {
+                        return v2_1;
+                    }
+
+                    v5_1.set(v8_1.getNotHitChildRuleId());
+                    goto label_202;
+                }
+
+                if(ScriptBytecodeAdapter.compareEqual(v14, RuleResultStatus.UNKNOWN)) {
+                    if(ScriptBytecodeAdapter.compareEqual(v8_1.getUnknownChildRuleId(), v4)) {
+                        return v2_1;
+                    }
+
+                    v5_1.set(v8_1.getUnknownChildRuleId());
+                }
+            }
+
+        label_202:
+            v17.set(((Integer)ScriptBytecodeAdapter.castToType(NumberNumberPlus.plus(((Integer)v17.get()), Integer.valueOf(1)), Integer.class)));
+            RuleRelation v1_3 = (RuleRelation)ScriptBytecodeAdapter.castToType(DefaultGroovyMethods.find(v16, new _fireTreeRules_closure13(this, this, v17, v5_1)), RuleRelation.class);
+            if(v1_3 != null) {
+                goto label_271;
+            }
+
+            if(v3_2.isWarnEnabled()) {
+                v3_2.warn(ShortTypeHandling.castToString(new GStringImpl(new Object[]{v6.getRuleSetId(), NumberNumberPlus.plus(((Integer)v17.get()), Integer.valueOf(1))}, new String[]{"RuleSet { id: ", " } at level ", " can\'t find Rule { id: "}).plus(new GStringImpl(new Object[]{((Long)v5_1.get())}, new String[]{"", " }\'s rule relation."}))));
+                return v2_1;
+            label_271:
+                Long v5_2 = v1_3.getRuleId();
+                v5 = v17;
+                v8_1 = v1_3;
+                v1 = v16;
+                v7 = this.context.getRuleRepository().findById(v5_2);
+                goto label_31;
+            }
+
+            return v2_1;
+        }
+
+        return v2_1;
+    }
+
+    public static String generateConditionScript(LogicalOperator arg5, String arg6, String arg7) {
+        String v5 = arg5.getScript();
+        String v0 = RulesEngine.generateMD5(v5);
+        Template v1 = (Template)ScriptBytecodeAdapter.castToType(RulesEngine.cachedOperator.get(v0), Template.class);
+        if(v1 == null) {
+            v1 = new SimpleTemplateEngine(new GroovyClassLoader()).createTemplate(v5);
+            RulesEngine.cachedOperator.put(v0, v1);
+        }
+
+        return ShortTypeHandling.castToString(v1.make(ScriptBytecodeAdapter.createMap(new Object[]{"FieldName", arg6, "ThresholdValue", arg7})));
+    }
+
+    public static String generateMD5(String arg1) {
+        return EncodingGroovyMethods.encodeHex(MessageDigest.getInstance("MD5").digest(arg1.getBytes())).toString();
+    }
+
+    public static AsyncHttpClient getAsyncHttpClient() {
+        return RulesEngine.asyncHttpClient;
+    }
+
+    public Map getCachedFields() {
+        return this.cachedFields;
+    }
+
+    public static Map getCachedOperator() {
+        return RulesEngine.cachedOperator;
+    }
+
+    public static Map getCachedRuleScripts() {
+        return RulesEngine.cachedRuleScripts;
+    }
+
+    public RulesEngineContext getContext() {
+        return this.context;
+    }
+
+    public static boolean getIsTestEnv() {
+        return RulesEngine.isTestEnv;
+    }
+
+    public MetaClass getMetaClass() {
+        MetaClass v0 = this.metaClass;
+        if(v0 != null) {
+            return v0;
+        }
+
+        MetaClass v0_1 = this.$getStaticMetaClass();
+        this.metaClass = v0_1;
+        return v0_1;
+    }
+
+    public Object getProperty(String arg2) {
+        return this.getMetaClass().getProperty(this, arg2);
+    }
+
+    public Object invokeMethod(String arg2, Object arg3) {
+        return this.getMetaClass().invokeMethod(this, arg2, arg3);
+    }
+
+    public static boolean isIsTestEnv() {
+        return RulesEngine.isTestEnv;
+    }
+
+    private Tuple2 judgeRuleSetResultByScore(RuleSet arg5, Integer arg6) {
+        if((ScriptBytecodeAdapter.compareGreaterThanEqual(arg6, arg5.getRefuseScoreMin())) && (ScriptBytecodeAdapter.compareLessThanEqual(arg6, arg5.getRefuseScoreMax()))) {
+            return new Tuple2(RuleSetResultStatus.REFUSE, null);
+        }
+
+        if((ScriptBytecodeAdapter.compareGreaterThanEqual(arg6, arg5.getPassScoreMin())) && (ScriptBytecodeAdapter.compareLessThanEqual(arg6, arg5.getPassScoreMax()))) {
+            return new Tuple2(RuleSetResultStatus.PASS, null);
+        }
+
+        if((ScriptBytecodeAdapter.compareGreaterThanEqual(arg6, arg5.getHintScoreMin())) && (ScriptBytecodeAdapter.compareLessThanEqual(arg6, arg5.getHintScoreMax()))) {
+            return new Tuple2(RuleSetResultStatus.HINT, null);
+        }
+
+        Long v5 = arg5.getId();
+        for(Object v5_1: this.context.getRuleSetTransitionRepository().findBySrcSetID(v5)) {
+            RuleSetTransition v5_2 = (RuleSetTransition)ScriptBytecodeAdapter.castToType(v5_1, RuleSetTransition.class);
+            if(!ScriptBytecodeAdapter.compareGreaterThanEqual(arg6, v5_2.getScoreMin()) || !ScriptBytecodeAdapter.compareLessThanEqual(arg6, v5_2.getScoreMax())) {
+                continue;
+            }
+
+            Long v5_3 = v5_2.getDstSetID();
+            return new Tuple2(RuleSetResultStatus.TRANSITION, v5_3);
+        }
+
+        return new Tuple2(RuleSetResultStatus.UNKNOWN, null);
+    }
+
+    public static RulesEngineContext pfaccess$0(RulesEngine arg0) {
+        return arg0.getContext();
+    }
+
+    public static Map pfaccess$1(RulesEngine arg0) {
+        return arg0.getCachedFields();
+    }
+
+    public static Future request(String arg3, Map arg4, String arg5) {
+        RequestBuilder v0 = (RequestBuilder)ScriptBytecodeAdapter.castToType(new RequestBuilder().setUrl(arg3), RequestBuilder.class);
+        v0.setBody(new JsonBuilder(arg4).toString());
+        ((RequestBuilder)v0.setHeader("content-type", "application/json")).setMethod(arg5.toUpperCase());
+        Logger v5 = RulesEngine.log;
+        if(v5.isInfoEnabled()) {
+            v5.info("Send request : {} {}", arg3, new JsonBuilder(arg4).toString());
+        }
+
+        return RulesEngine.asyncHttpClient.prepareRequest(v0.build()).execute(new GroovyObject() {
+            public String onCompleted(Response arg1) throws Exception {
+                return arg1.getResponseBody();
+            }
+        });
+    }
+
+    public void saveCallLog(Event arg9, String arg10, String arg11, EventResult arg12) {
+        public class _saveCallLog_closure22 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+            private Reference event;
+            private Reference eventResult;
+            private Reference now;
+            private Reference transactionId;
+            private Reference userId;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _saveCallLog_closure22.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _saveCallLog_closure22.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _saveCallLog_closure22.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _saveCallLog_closure22(Object arg1, Object arg2, Reference arg3, Reference arg4, Reference arg5, Reference arg6, Reference arg7) {
+                super(arg1, arg2);
+                this.event = arg3;
+                this.eventResult = arg4;
+                this.userId = arg5;
+                this.transactionId = arg6;
+                this.now = arg7;
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall(Object arg6) {
+                public class _closure23 extends Closure implements GeneratedClosure {
+                    private static ClassInfo $staticClassInfo;
+                    public static transient boolean __$stMC;
+                    private Reference callLog;
+                    private Reference now;
+
+                    protected MetaClass $getStaticMetaClass() {
+                        if(this.getClass() != _closure23.class) {
+                            return ScriptBytecodeAdapter.initMetaClass(this);
+                        }
+
+                        ClassInfo v0 = _closure23.$staticClassInfo;
+                        if(v0 == null) {
+                            v0 = ClassInfo.getClassInfo(this.getClass());
+                            _closure23.$staticClassInfo = v0;
+                        }
+
+                        return v0.getMetaClass();
+                    }
+
+                    public _closure23(Object arg1, Object arg2, Reference arg3, Reference arg4) {
+                        super(arg1, arg2);
+                        this.callLog = arg3;
+                        this.now = arg4;
+                    }
+
+                    public Object call() {
+                        return this.doCall(null);
+                    }
+
+                    public Object call(Object arg1) {
+                        return this.doCall(arg1);
+                    }
+
+                    public Object doCall() {
+                        return this.doCall(null);
+                    }
+
+                    public Object doCall(Object arg4) {
+                        ((RulesEngine)ScriptBytecodeAdapter.castToType(this.getThisObject(), RulesEngine.class)).saveRuleExecutionLog(((CallLog)this.callLog.get()).getId(), ((RuleResult)ScriptBytecodeAdapter.castToType(arg4, RuleResult.class)), ((Date)ScriptBytecodeAdapter.castToType(this.now.get(), Date.class)));
+                        return null;
+                    }
+
+                    public Object getCallLog() {
+                        return this.callLog.get();
+                    }
+
+                    public Object getNow() {
+                        return this.now.get();
+                    }
+                }
+
+                Reference v1 = new Reference(new CallLog());
+                ScriptBytecodeAdapter.setProperty(((Event)this.event.get()).getId(), null, v1.get(), "eventId");
+                ScriptBytecodeAdapter.setProperty(((Event)this.event.get()).getName(), null, v1.get(), "eventName");
+                ScriptBytecodeAdapter.setProperty(((Event)this.event.get()).getEventType().getId(), null, v1.get(), "eventTypeId");
+                ScriptBytecodeAdapter.setProperty(((Event)this.event.get()).getEventType().getName(), null, v1.get(), "eventType");
+                ScriptBytecodeAdapter.setProperty(((Event)this.event.get()).getAppType().getId(), null, v1.get(), "applicationId");
+                ScriptBytecodeAdapter.setProperty(((Event)this.event.get()).getAppType().getName(), null, v1.get(), "applicationType");
+                ScriptBytecodeAdapter.setProperty(((EventResult)this.eventResult.get()).getScore(), null, v1.get(), "eventScore");
+                ScriptBytecodeAdapter.setProperty(((EventResult)this.eventResult.get()).getStatus(), null, v1.get(), "eventResult");
+                RuleSetResult v6 = (RuleSetResult)arg6;
+                ScriptBytecodeAdapter.setProperty(v6.getId(), null, v1.get(), "ruleSetId");
+                ScriptBytecodeAdapter.setProperty(v6.getName(), null, v1.get(), "ruleSetName");
+                ScriptBytecodeAdapter.setProperty(v6.getTotalScore(), null, v1.get(), "ruleSetScore");
+                ScriptBytecodeAdapter.setProperty(v6.getStatus(), null, v1.get(), "ruleSetResult");
+                ScriptBytecodeAdapter.setProperty(ShortTypeHandling.castToString(this.userId.get()), null, v1.get(), "userId");
+                ScriptBytecodeAdapter.setProperty(ShortTypeHandling.castToString(this.transactionId.get()), null, v1.get(), "transactionId");
+                ScriptBytecodeAdapter.setProperty(v6.getCostTime(), null, v1.get(), "ruleSetCostTime");
+                ScriptBytecodeAdapter.setProperty(((EventResult)this.eventResult.get()).getCostTime(), null, v1.get(), "eventCostTime");
+                ScriptBytecodeAdapter.setProperty(((Date)ScriptBytecodeAdapter.castToType(this.now.get(), Date.class)), null, v1.get(), "dateCreated");
+                v1.set(((RulesEngine)ScriptBytecodeAdapter.castToType(this.getThisObject(), RulesEngine.class)).getContext().getCallLogRepository().save(v1.get()));
+                return v6.getRuleResults() != null ? DefaultGroovyMethods.each(v6.getRuleResults(), new _closure23(this, this.getThisObject(), v1, this.now)) : null;
+            }
+
+            public Event getEvent() {
+                return (Event)ScriptBytecodeAdapter.castToType(this.event.get(), Event.class);
+            }
+
+            public EventResult getEventResult() {
+                return (EventResult)ScriptBytecodeAdapter.castToType(this.eventResult.get(), EventResult.class);
+            }
+
+            public Object getNow() {
+                return this.now.get();
+            }
+
+            public String getTransactionId() {
+                return ShortTypeHandling.castToString(this.transactionId.get());
+            }
+
+            public String getUserId() {
+                return ShortTypeHandling.castToString(this.userId.get());
+            }
+        }
+
+        Reference v3 = new Reference(arg9);
+        Reference v5 = new Reference(arg10);
+        Reference v6 = new Reference(arg11);
+        Reference v4 = new Reference(arg12);
+        Reference v7 = new Reference(new Date());
+        DefaultGroovyMethods.each(((EventResult)v4.get()).getRuleSetResults(), new _saveCallLog_closure22(this, this, v3, v4, v5, v6, v7));
+    }
+
+    public void saveRuleExecutionLog(Long arg2, RuleResult arg3, Date arg4) {
+        RuleExecutionLog v0 = new RuleExecutionLog();
+        v0.setCallLogId(arg2);
+        v0.setRuleId(arg3.getId());
+        v0.setRuleName(arg3.getName());
+        v0.setRuleSetId(arg3.getRuleSetId());
+        v0.setRuleSetName(arg3.getRuleSetName());
+        v0.setRuleScore(arg3.getScore());
+        v0.setRuleStatus(arg3.getStatus());
+        v0.setRuleFieldIds(arg3.getFieldIds());
+        v0.setRuleFieldNames(arg3.getFieldNames());
+        v0.setRuleFieldValues(arg3.getFieldValues());
+        v0.setCostTime(arg3.getCostTime());
+        v0.setDateCreated(arg4);
+        this.context.getRuleExecutionLogRepository().save(v0);
+    }
+
+    public static void setAsyncHttpClient(AsyncHttpClient arg0) {
+        RulesEngine.asyncHttpClient = arg0;
+    }
+
+    public void setCachedFields(Map arg1) {
+        this.cachedFields = arg1;
+    }
+
+    public static void setCachedOperator(Map arg0) {
+        RulesEngine.cachedOperator = arg0;
+    }
+
+    public static void setCachedRuleScripts(Map arg0) {
+        RulesEngine.cachedRuleScripts = arg0;
+    }
+
+    public void setContext(RulesEngineContext arg1) {
+        this.context = arg1;
+    }
+
+    public void setMetaClass(MetaClass arg1) {
+        this.metaClass = arg1;
+    }
+
+    public void setProperty(String arg2, Object arg3) {
+        this.getMetaClass().setProperty(this, arg2, arg3);
+    }
+
+    public Object this$dist$get$1(String arg5) {
+        String v5 = ShortTypeHandling.castToString(new GStringImpl(new Object[]{arg5}, new String[]{"", ""}));
+        return ScriptBytecodeAdapter.getGroovyObjectProperty(RulesEngine.class, this, v5);
+    }
+
+    public Object this$dist$invoke$1(String arg6, Object arg7) {
+        String v6 = ShortTypeHandling.castToString(new GStringImpl(new Object[]{arg6}, new String[]{"", ""}));
+        Object[] v7 = ScriptBytecodeAdapter.despreadList(new Object[0], new Object[]{arg7}, new int[]{0});
+        return ScriptBytecodeAdapter.invokeMethodOnCurrentN(RulesEngine.class, this, v6, v7);
+    }
+
+    public void this$dist$set$1(String arg5, Object arg6) {
+        String v5 = ShortTypeHandling.castToString(new GStringImpl(new Object[]{arg5}, new String[]{"", ""}));
+        ScriptBytecodeAdapter.setGroovyObjectProperty(arg6, RulesEngine.class, this, v5);
+    }
+
+    public static Object toObject(Class arg3, Object arg4) {
+        if(arg4 == null || (ScriptBytecodeAdapter.compareEqual(arg4, "")) || (ScriptBytecodeAdapter.compareEqual(arg4, ScriptBytecodeAdapter.createList(new Object[0])))) {
+            return arg4;
+        }
+
+        if(ScriptBytecodeAdapter.compareEqual(String.class, arg3)) {
+            return String.valueOf(arg4);
+        }
+
+        if(ScriptBytecodeAdapter.compareEqual(Integer.class, arg3)) {
+            return (int)Integer.parseInt(String.valueOf(arg4));
+        }
+
+        if(ScriptBytecodeAdapter.compareEqual(Double.class, arg3)) {
+            return (double)Double.parseDouble(String.valueOf(arg4));
+        }
+
+        if(ScriptBytecodeAdapter.compareEqual(Boolean.class, arg3)) {
+            return Boolean.valueOf(Boolean.parseBoolean(String.valueOf(arg4)));
+        }
+
+        return ScriptBytecodeAdapter.compareEqual(List.class, arg3) ? ((List)ScriptBytecodeAdapter.asType(arg4, List.class)) : arg4;
+    }
+
+    public EventResult touchOffEvent(Long arg5, Map arg6) {
+        public class _touchOffEvent_closure1 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _touchOffEvent_closure1.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _touchOffEvent_closure1.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _touchOffEvent_closure1.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _touchOffEvent_closure1(Object arg1, Object arg2) {
+                super(arg1, arg2);
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg1) {
+                return ((EventRuleSetRelation)arg1).getRuleSetId();
+            }
+        }
+
+
+        public class _touchOffEvent_closure2 extends Closure implements GeneratedClosure {
+            private static ClassInfo $staticClassInfo;
+            public static transient boolean __$stMC;
+            private Reference basicInfo;
+            private Reference ruleSetResultList;
+
+            protected MetaClass $getStaticMetaClass() {
+                if(this.getClass() != _touchOffEvent_closure2.class) {
+                    return ScriptBytecodeAdapter.initMetaClass(this);
+                }
+
+                ClassInfo v0 = _touchOffEvent_closure2.$staticClassInfo;
+                if(v0 == null) {
+                    v0 = ClassInfo.getClassInfo(this.getClass());
+                    _touchOffEvent_closure2.$staticClassInfo = v0;
+                }
+
+                return v0.getMetaClass();
+            }
+
+            public _touchOffEvent_closure2(Object arg1, Object arg2, Reference arg3, Reference arg4) {
+                super(arg1, arg2);
+                this.basicInfo = arg3;
+                this.ruleSetResultList = arg4;
+            }
+
+            public Object call() {
+                return this.doCall(null);
+            }
+
+            public Object call(Object arg1) {
+                return this.doCall(arg1);
+            }
+
+            public Object doCall() {
+                return this.doCall(null);
+            }
+
+            public Object doCall(Object arg4) {
+                RuleSetResult v4 = ((RulesEngine)ScriptBytecodeAdapter.castToType(this.getThisObject(), RulesEngine.class)).fireRuleSet(((Long)ScriptBytecodeAdapter.castToType(arg4, Long.class)), ((Map)ScriptBytecodeAdapter.castToType(this.basicInfo.get(), Map.class)));
+                return Boolean.valueOf(((List)this.ruleSetResultList.get()).add(v4));
+            }
+
+            public Map getBasicInfo() {
+                return (Map)ScriptBytecodeAdapter.castToType(this.basicInfo.get(), Map.class);
+            }
+
+            public List getRuleSetResultList() {
+                return (List)ScriptBytecodeAdapter.castToType(this.ruleSetResultList.get(), List.class);
+            }
+        }
+
+        Reference v0 = new Reference(arg6);
+        Event v5 = (Event)this.context.getEventRepository().findOne(arg5);
+        Long v1 = v5.getId();
+        List v6 = this.context.getEventRuleSetRelationRepository().findByEventId(v1);
+        if(v6.size() == 0) {
+            EventResult v4 = new EventResult();
+            v4.setId(v5.getId());
+            v4.setName(v5.getName());
+            v4.setStatus(EventResultStatus.NONE);
+            return v4;
+        }
+
+        List v6_1 = DefaultGroovyMethods.collect(v6, new _touchOffEvent_closure1(this, this));
+        Reference v2 = new Reference(ScriptBytecodeAdapter.createList(new Object[0]));
+        DefaultGroovyMethods.each(v6_1, new _touchOffEvent_closure2(this, this, v0, v2));
+        EventResult v6_2 = RulesEngine.buildEventResult(v5, ((List)v2.get()));
+        this.saveCallLog(v5, ((String)ScriptBytecodeAdapter.asType(DefaultGroovyMethods.get(this.cachedFields, "id", null), String.class)), ((String)ScriptBytecodeAdapter.asType(DefaultGroovyMethods.get(this.cachedFields, "transactionId", null), String.class)), v6_2);
+        return v6_2;
+    }
+}
+
