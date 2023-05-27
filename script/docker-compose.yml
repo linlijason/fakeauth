@@ -4,6 +4,7 @@ services:
     container_name: rule-engine
     environment:
       org.asynchttpclient.readTimeout: 150000
+      org.asynchttpclient.requestTimeout: 150000
       spring.redis.host: r-t4nzs4kqupunhx9izmpd.redis.singapore.rds.aliyuncs.com
       spring.redis.port: 6379
       spring.redis.password: Aa123456
