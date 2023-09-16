@@ -1,39 +1,38 @@
-version: '3'
+version: '3.5'
 services:
   rule-engine:
     container_name: rule-engine
     environment:
       org.asynchttpclient.readTimeout: 150000
       org.asynchttpclient.requestTimeout: 150000
-      spring.redis.host: r-t4nzs4kqupunhx9izmpd.redis.singapore.rds.aliyuncs.com
+      spring.redis.host: redis
       spring.redis.port: 6379
-      spring.redis.password: Aa123456
+      spring.redis.password: youshallnotpass9
       spring.redis.database: 2
-      jumei.auth.api.addr: http://8.219.49.205:8301/auth
-      spring.datasource.url: jdbc:mysql://rm-t4ni526qb82jyhs247o.mysql.singapore.rds.aliyuncs.com:3306/risk_decision_engine?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&autoReconnect=true
-      spring.datasource.username: decision_engine
-      spring.datasource.password: cdMSQZq2zeg9
+      jumei.auth.api.addr: http://43.135.220.141:8301/auth
+      spring.datasource.url: jdbc:mysql://mysql57:3306/re?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&autoReconnect=true
+      spring.datasource.username: root
+      spring.datasource.password: 777888OP
       jumei.auth.api.app.key: e9d34b22cdcd11e78d73842b2b738d12
     image: adoptopenjdk/openjdk8
     ports:
       - '8300:23333'
     restart: always
     working_dir: /app
-    network_mode: bridge
     command: java  -server -jar  /app/app.jar
     volumes:
-      - /data/docker/rule/engine:/app
+      - ./re:/app
   rule-login:
     container_name: rule-login
     environment:
-      spring.redis.host: r-t4nzs4kqupunhx9izmpd.redis.singapore.rds.aliyuncs.com
+      spring.redis.host: redis
       spring.redis.port: 6379
-      spring.redis.password: Aa123456
+      spring.redis.password: youshallnotpass9
       spring.redis.database: 2
-      auth.loginurl: http://8.219.49.205:8300/login/callback
-      spring.datasource.url: jdbc:mysql://rm-t4ni526qb82jyhs247o.mysql.singapore.rds.aliyuncs.com:3306/risk_decision_engine?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&autoReconnect=true
-      spring.datasource.username: decision_engine
-      spring.datasource.password: cdMSQZq2zeg9
+      auth.loginurl: http://43.135.220.141:8300/login/callback
+      spring.datasource.url: jdbc:mysql://mysql57:3306/re?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&autoReconnect=true
+      spring.datasource.username: root
+      spring.datasource.password: 777888OP
       spring.datasource.hikari.connection-timeout: 5000
       spring.datasource.hikari.minimum-idle: 5
       spring.datasource.hikari.maximum-pool-size: 20
@@ -42,7 +41,6 @@ services:
       spring.datasource.hikari.connection-test-query: SELECT 1
       spring.profiles.active: prod
       auth.appkey: e9d34b22cdcd11e78d73842b2b738d12
-    network_mode: bridge
     image: adoptopenjdk/openjdk8
     ports:
       - '8301:23334'
@@ -52,11 +50,10 @@ services:
     restart: always
     command: java -server -jar /app/app.jar
     volumes:
-      - /data/docker/rule/auth:/app
+      - ./auth:/app
 
 
-# 加入已存在的网络
 networks:
   default:
-    external:
-      name: my-custom-network
+    name: fin
+    external: true
